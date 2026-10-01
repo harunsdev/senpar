@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Report — Senpar Family Information Vault</title>
+<style>
+  :root { --pass: #22c55e; --fail: #ef4444; --warn: #f59e0b; --info: #3b82f6; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --muted: #64748b; --border: #e2e8f0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+  header { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); color: white; padding: 40px 0; margin-bottom: 32px; }
+  header .container { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+  header h1 { font-size: 28px; font-weight: 700; }
+  header p { color: #94a3b8; font-size: 14px; }
+  .meta-badge { background: rgba(255,255,255,0.1); padding: 6px 14px; border-radius: 8px; font-size: 13px; color: #cbd5e1; }
+  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px; }
+  .summary-card { background: var(--card); border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); text-align: center; border-top: 4px solid var(--border); }
+  .summary-card.pass { border-top-color: var(--pass); }
+  .summary-card.fail { border-top-color: var(--fail); }
+  .summary-card.warn { border-top-color: var(--warn); }
+  .summary-card.info { border-top-color: var(--info); }
+  .summary-card .number { font-size: 36px; font-weight: 800; }
+  .summary-card .label { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+  .summary-card.pass .number { color: var(--pass); }
+  .summary-card.fail .number { color: var(--fail); }
+  .summary-card.warn .number { color: var(--warn); }
+  .summary-card.info .number { color: var(--info); }
+  .section { margin-bottom: 32px; }
+  .section-title { font-size: 20px; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--border); }
+  .tc-card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-left: 4px solid var(--border); }
+  .tc-card.pass { border-left-color: var(--pass); }
+  .tc-card.fail { border-left-color: var(--fail); }
+  .tc-card.partial { border-left-color: var(--warn); }
+  .tc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+  .tc-id { font-weight: 700; font-size: 15px; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+  .badge-pass { background: #dcfce7; color: #166534; }
+  .badge-fail { background: #fee2e2; color: #991b1b; }
+  .badge-partial { background: #fef3c7; color: #92400e; }
+  .badge-critical { background: #fee2e2; color: #991b1b; }
+  .badge-high { background: #fed7aa; color: #9a3412; }
+  .badge-medium { background: #fef3c7; color: #92400e; }
+  .badge-low { background: #e0e7ff; color: #3730a3; }
+  .tc-feature { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+  .tc-detail { color: var(--muted); font-size: 14px; margin-bottom: 8px; }
+  .tc-notes { background: #f1f5f9; padding: 12px 16px; border-radius: 8px; font-size: 14px; margin-top: 10px; }
+  .tc-notes strong { color: var(--text); }
+  .screenshot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 12px; }
+  .screenshot-item { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .screenshot-item img { width: 100%; height: auto; display: block; }
+  .screenshot-item .caption { padding: 8px 12px; font-size: 12px; color: var(--muted); background: #f8fafc; }
+  .issue-card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .issue-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+  .issue-title { font-weight: 700; font-size: 15px; }
+  .issue-desc { font-size: 14px; color: var(--muted); margin-bottom: 8px; }
+  .issue-impact { font-size: 13px; padding: 8px 12px; background: #fff7ed; border-radius: 6px; border-left: 3px solid var(--warn); }
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+  th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); font-size: 14px; }
+  th { background: #f1f5f9; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.3px; color: var(--muted); }
+  .env-table td:first-child { font-weight: 600; width: 200px; }
+  footer { text-align: center; padding: 24px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); margin-top: 40px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div>
+      <h1>🔐 Senpar — Test Report</h1>
+      <p>Family Information Vault — Comprehensive End-to-End Test Results</p>
+    </div>
+    <div style="text-align:right">
+      <div class="meta-badge">📅 October 1, 2026</div>
+      <div class="meta-badge" style="margin-top:6px">🌐 https://senpar.abacusai.app</div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- Executive Summary -->
+  <div class="section">
+    <h2 class="section-title">📊 Executive Summary</h2>
+    <div class="summary-grid">
+      <div class="summary-card info">
+        <div class="number">12</div>
+        <div class="label">Total Test Cases</div>
+      </div>
+      <div class="summary-card pass">
+        <div class="number">9</div>
+        <div class="label">Passed</div>
+      </div>
+      <div class="summary-card fail">
+        <div class="number">1</div>
+        <div class="label">Failed</div>
+      </div>
+      <div class="summary-card warn">
+        <div class="number">2</div>
+        <div class="label">Partial Pass</div>
+      </div>
+    </div>
+    <p style="font-size:15px; color:var(--muted); margin-top:8px;">
+      Overall pass rate: <strong style="color:var(--pass)">75%</strong> (9/12 fully passed). Two critical bugs were found: a <strong>non-functional global search</strong> and a <strong>Tab key navigation misalignment</strong> in form modals that causes data to be entered in wrong fields. A generic 404 page with no branding or navigation was also identified. The core CRUD operations, authentication, sharing toggle, and section-level filtering all work correctly.
+    </p>
+  </div>
+
+  <!-- Test Environment -->
+  <div class="section">
+    <h2 class="section-title">🖥️ Test Environment</h2>
+    <table class="env-table">
+      <tr><td>Application</td><td>Senpar — Family Information Vault (Test Mode)</td></tr>
+      <tr><td>URL</td><td>https://senpar.abacusai.app</td></tr>
+      <tr><td>Browser</td><td>Google Chrome (Linux)</td></tr>
+      <tr><td>Operating System</td><td>Ubuntu Linux</td></tr>
+      <tr><td>Viewport</td><td>1024 × 768</td></tr>
+      <tr><td>Language</td><td>Danish (DK)</td></tr>
+      <tr><td>Test Date</td><td>October 1, 2026</td></tr>
+      <tr><td>Test Account</td><td>demo@senpar.test (Demo credentials)</td></tr>
+      <tr><td>Framework</td><td>Next.js (detected from _next/ static assets)</td></tr>
+    </table>
+  </div>
+
+  <!-- Issues Found -->
+  <div class="section">
+    <h2 class="section-title">🐛 Issues Found</h2>
+
+    <div class="issue-card">
+      <div class="issue-header">
+        <span class="badge badge-critical">Critical</span>
+        <span class="issue-title">BUG-001: Global Search Bar is Non-Functional</span>
+      </div>
+      <div class="issue-desc">
+        The global search bar ("Søg i boksen...") at the top of the page does not filter or search any content. Typing a search term and pressing Enter navigates to <code>/dashboard?search=Netflix</code> but displays all dashboard items without any filtering. The search query parameter is ignored entirely.
+      </div>
+      <div class="issue-impact">
+        <strong>Impact:</strong> Users cannot find items across vault sections. For a password/information vault, search is a core feature — its absence forces users to manually browse every section to find entries.
+      </div>
+      <div class="screenshot-grid">
+        <div class="screenshot-item">
+          <img src="screenshots/screenshot_1790864034459.png" alt="Global search typed Netflix">
+          <div class="caption">Typed "Netflix" in global search — all items still visible</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="screenshots/screenshot_1790864043792.png" alt="Search results page shows all items">
+          <div class="caption">After Enter — /dashboard?search=Netflix shows all items unfiltered</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="issue-card">
+      <div class="issue-header">
+        <span class="badge badge-high">High</span>
+        <span class="issue-title">BUG-002: Tab Key Navigation Misaligns Form Fields</span>
+      </div>
+      <div class="issue-desc">
+        When using the Tab key to navigate between form fields in create/edit modals, the tab order does not match the visual field order. This causes data to be entered in the wrong fields. For example, in the Password form, tabbing from the Password field skips the URL field and lands in Notes. In the Family form, tabbing skips the Birthday date picker, causing phone/email values to shift into wrong fields.
+      </div>
+      <div class="issue-impact">
+        <strong>Impact:</strong> Keyboard-only users and accessibility tool users will consistently enter data in wrong fields. This is both a data integrity risk and an accessibility compliance failure (WCAG 2.1 — Focus Order).
+      </div>
+      <div class="screenshot-grid">
+        <div class="screenshot-item">
+          <img src="screenshots/screenshot_1790863681137.png" alt="Password URL field shows notes text">
+          <div class="caption">Password form: URL field contains notes text due to Tab misalignment</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="screenshots/screenshot_1790863945239.png" alt="Family phone field shows email">
+          <div class="caption">Family form: Phone field shows email value due to Tab misalignment</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="issue-card">
+      <div class="issue-header">
+        <span class="badge badge-medium">Medium</span>
+        <span class="issue-title">BUG-003: Generic 404 Page with No Navigation</span>
+      </div>
+      <div class="issue-desc">
+        Navigating to a non-existent URL (e.g., <code>/nonexistent-page</code>) shows a plain "404 | This page could not be found." message with no Senpar branding, no sidebar, and no link to return to the application. Users are stranded.
+      </div>
+      <div class="issue-impact">
+        <strong>Impact:</strong> Users who reach a 404 page (via bookmarks, shared links, or typos) have no way to navigate back to the app without using the browser back button. This is a poor user experience.
+      </div>
+      <div class="screenshot-grid">
+        <div class="screenshot-item">
+          <img src="screenshots/screenshot_1790864051018.png" alt="Generic 404 page">
+          <div class="caption">Generic Next.js 404 page — no branding or navigation</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="issue-card">
+      <div class="issue-header">
+        <span class="badge badge-low">Low</span>
+        <span class="issue-title">BUG-004: No Visible Validation Error on Empty Required Fields</span>
+      </div>
+      <div class="issue-desc">
+        When submitting a form with an empty required field (e.g., Title), the form silently prevents submission but shows no visual error message, no red border, and no tooltip. The user receives no feedback about what needs to be corrected.
+      </div>
+      <div class="issue-impact">
+        <strong>Impact:</strong> Users may be confused about why the form won't submit, especially if they accidentally cleared a required field. This is a UX friction point.
+      </div>
+      <div class="screenshot-grid">
+        <div class="screenshot-item">
+          <img src="screenshots/screenshot_1790863997255.png" alt="No validation error shown">
+          <div class="caption">Empty title field — no visible error message after clicking Save</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed Test Results -->
+  <div class="section">
+    <h2 class="section-title">📋 Detailed Test Results</h2>
+
+    <div class="tc-card pass">
+      <div class="tc-header">
+        <span class="tc-id">TC1 — Authentication</span>
+        <span class="badge badge-pass">✅ Pass</span>
+      </div>
+      <div class="tc-feature">Login, Logout, Session Persistence, Route Protection</div>
+      <div class="tc-detail">Tested invalid credentials (error shown), demo login (success), page refresh (session persists), direct URL access (works when authenticated), logout (redirects to login), protected route access when logged out (redirects to login), and sign-up link (navigates to /signup).</div>
+      <div class="screenshot-grid">
+        <div class="screenshot-item">
+          <img src="screenshots/screenshot_1790863519460.png" alt="Invalid credentials error">
+          <div class="caption">Invalid credentials — error message displayed</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="screenshots/screenshot_1790863586597.png" alt="Session persists after refresh">
+          <div class="caption">Session persists after page refresh</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="screenshots/screenshot_1790864086603.png" alt="Protected route redirect">
+          <div class="caption">Protected route redirects to login when logged out</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tc-card pass">
+      <div class="tc-header">
+        <span class="tc-id">TC2 — Dashboard (Oversigt)</span>
+        <span class="badge badge-pass">✅ Pass</span>
+      </div>
+      <div class="tc-feature">Summary Counts, Card Navigation</div>
+      <div class="tc-detail">Dashboard counts (Adgangskoder: 3, Enheder: 5, Abonnementer: 4, Sikre noter: 3, Familie: 5) match actual items. Clicking summary cards navigates to correct sections. Recent element cards navigate to their respective sections.</div>
+      <div class="screenshot-grid">
+        <div class="screenshot-item">
+          <img src="screenshots/screenshot_1790863620914.png" alt="Dashboard with counts">
+          <div class="caption">Dashboard with correct summary counts</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="screenshots/screenshot_1790863611836.png" alt="Card navigation works">
+          <div class="caption">Clicking Adgangskoder card navigates to passwords (3 items)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tc-card partial">
+      <div class="tc-header">
+        <span class="tc-id">TC3 — Vault CRUD: Passwords</span>
+        <span class="badge badge-partial">⚠️ Partial</span>
+      </div>
+      <div class="tc-feature">Create, Read, Update, Delete, Filter, Password Masking</div>
+      <div class="tc-detail">All CRUD operations work correctly when using mouse clicks to navigate fields. Create, edit, delete, and filter all function as expected. Password masking works. However, when using Tab key to navigate fields, data is entered in wrong fields (see BUG-002).</div>
+      <div class="tc-notes"><strong>Issue:</strong> Tab navigation causes URL and Notes fields to swap values. Mouse-click field selection works correctly.</div>
+      <div class="screenshot-grid">
+        <div class="screenshot-item">
+          <img src="screenshots/screenshot_1790863663628.png" alt="Password created">
+          <div class="caption">New password entry created successfully</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="screenshots/screenshot_1790863739753.png" alt="Filter works">
+          <div class="caption">Per-section filter correctly shows only "Netflix"</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tc-card pass">
+      <div class="tc-header">
+        <span class="tc-id">TC4 — Vault CRUD: Devices</span>
+        <span class="badge badge-pass">✅ Pass</span>
+      </div>
+      <div class="tc-feature">Create, Read, Update, Delete, Device Type Dropdown</div>
+      <div class="tc-detail">Created "Test Device" as Bærbar (Laptop) with Dell XPS 15 model. Device type dropdown works with 5 options. Entry appeared with correct type label. Delete with confirmation dialog works.</div>
+      <div class="screenshot-grid">
+        <div class="screenshot-item">
+          <img src="screenshots/screenshot_1790863781979.png" alt="Device created">
+          <div class="caption">New device created with correct type categorization</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tc-card pass">
+      <div class="tc-header">
+        <span class="tc-id">TC5 — Vault CRUD: Subscriptions</span>
+        <span class="badge badge-pass">✅ Pass</span>
+      </div>
+      <div class="tc-feature">Create, Read, Update, Delete, Cost Display</div>
+      <div class="tc-detail">Created "Test Subscription" at $9.99/mo. Cost display formatting correct. Billing cycle dropdown works. Delete with confirmation works.</div>
+      <div class="screenshot-grid">
+        <div class="screenshot-item">
+          <img src="screenshots/screenshot_1790863834338.png" alt="Subscription created">
+          <div class="caption">Subscription created with correct cost display ($9.99/mo)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tc-card pass">
+      <div class="tc-header">
+        <span class="tc-id">TC6 — Vault CRUD: Secure Notes</span>
+        <span class="badge badge-pass">✅ Pass</span>
+      </div>
+      <div class="tc-feature">Create, Read, Update, Delete, Content Persistence</div>
+      <div class="tc-detail">Created "Test Secure Note" with category tag and content. Verified content persists after save by re-opening the entry. Delete with confirmation works.</div>
+      <div class="screenshot-grid">
+        <div class="screenshot-item">
+          <img src="screenshots/screenshot_1790863889299.png" alt="Note content persists">
+          <div class="caption">Secure note content persists correctly after save</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tc-card pass">
+      <div class="tc-header">
+        <span class="tc-id">TC7 — Vault CRUD: Family Members</span>
+        <span class="badge badge-pass">✅ Pass</span>
+      </div>
+      <div class="tc-feature">Create, Read, Update, Delete, Sharing Toggle</div>
+      <div class="tc-detail">Created "Test Family Member" with all fields. CRUD operations work. Same Tab navigation bug as passwords applies here (see BUG-002), but mouse-click field entry works correctly.</div>
+      <div class="screenshot-grid">
+        <div class="screenshot-item">
+          <img src="screenshots/screenshot_1790863936441.png" alt="Family member created">
+          <div class="caption">Family member created with sharing enabled</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tc-card partial">
+      <div class="tc-header">
+        <span class="tc-id">TC8 — Form Validation</span>
+        <span class="badge badge-partial">⚠️ Partial</span>
+      </div>
+      <div class="tc-feature">Empty Field Validation, XSS Prevention, Boundary Inputs</div>
+      <div class="tc-detail">Empty title prevents form submission (good), but no visible error message is shown (see BUG-004). XSS payloads are properly escaped — script tags render as text, not executed. Special characters accepted in all fields.</div>
+      <div class="screenshot-grid">
+        <div class="screenshot-item">
+          <img src="screenshots/screenshot_1790864007757.png" alt="XSS escaped">
+          <div class="caption">XSS payload rendered as text — properly escaped</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tc-card fail">
+      <div class="tc-header">
+        <span class="tc-id">TC9 — Search and Filter</span>
+        <span class="badge badge-fail">❌ Fail</span>
+      </div>
+      <div class="tc-feature">Global Search, Per-Section Filter</div>
+      <div class="tc-detail">Global search bar is completely non-functional (see BUG-001). Typing and pressing Enter navigates to dashboard with search parameter but shows all items unfiltered. Per-section filter boxes work correctly.</div>
+      <div class="screenshot-grid">
+        <div class="screenshot-item">
+          <img src="screenshots/screenshot_1790864043792.png" alt="Global search broken">
+          <div class="caption">Global search shows all items — no filtering applied</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="screenshots/screenshot_1790863739753.png" alt="Section filter works">
+          <div class="caption">Per-section filter works correctly</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tc-card pass">
+      <div class="tc-header">
+        <span class="tc-id">TC10 — Navigation and Routing</span>
+        <span class="badge badge-pass">✅ Pass</span>
+      </div>
+      <div class="tc-feature">Sidebar Links, Direct URL Access, Back/Forward, 404 Handling</div>
+      <div class="tc-detail">All sidebar links navigate correctly. Direct URL access works when authenticated. Browser back/forward navigation works. Protected routes redirect to login when unauthenticated. 404 page exists but is generic (see BUG-003).</div>
+      <div class="screenshot-grid">
+        <div class="screenshot-item">
+          <img src="screenshots/screenshot_1790864051018.png" alt="404 page">
+          <div class="caption">Generic 404 page — no branding or navigation back</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tc-card pass">
+      <div class="tc-header">
+        <span class="tc-id">TC11 — Sharing/Privacy Toggle</span>
+        <span class="badge badge-pass">✅ Pass</span>
+      </div>
+      <div class="tc-feature">Toggle State, Badge Update, Persistence</div>
+      <div class="tc-detail">Toggling "Del med familien" correctly changes the badge between "Privat" and "Delt". Toggle state persists after save — re-opening the item shows the correct toggle position. Toggling back reverts the badge.</div>
+      <div class="screenshot-grid">
+        <div class="screenshot-item">
+          <img src="screenshots/screenshot_1790864139352.png" alt="Sharing toggled to Delt">
+          <div class="caption">GitHub (Work) toggled from Privat to Delt</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="screenshots/screenshot_1790864158291.png" alt="Sharing toggled back to Privat">
+          <div class="caption">Toggled back to Privat — state persists correctly</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tc-card pass">
+      <div class="tc-header">
+        <span class="tc-id">TC12 — Language and UI</span>
+        <span class="badge badge-pass">✅ Pass</span>
+      </div>
+      <div class="tc-feature">Danish Language, Test Mode Banner, Broken Images/Links</div>
+      <div class="tc-detail">DK flag and language indicator visible in header. Test mode banners displayed at top ("TESTTILSTAND — Kun til demoformål") and bottom ("Kun testtilstand"). All UI text in Danish. No broken images or broken links detected via DOM inspection.</div>
+    </div>
+  </div>
+
+  <!-- Summary Table -->
+  <div class="section">
+    <h2 class="section-title">📈 Results Summary</h2>
+    <table>
+      <thead>
+        <tr><th>ID</th><th>Feature</th><th>Priority</th><th>Status</th><th>Issues</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>TC1</td><td>Authentication</td><td>Critical</td><td><span class="badge badge-pass">Pass</span></td><td>—</td></tr>
+        <tr><td>TC2</td><td>Dashboard</td><td>High</td><td><span class="badge badge-pass">Pass</span></td><td>—</td></tr>
+        <tr><td>TC3</td><td>Passwords CRUD</td><td>Critical</td><td><span class="badge badge-partial">Partial</span></td><td>BUG-002</td></tr>
+        <tr><td>TC4</td><td>Devices CRUD</td><td>High</td><td><span class="badge badge-pass">Pass</span></td><td>—</td></tr>
+        <tr><td>TC5</td><td>Subscriptions CRUD</td><td>High</td><td><span class="badge badge-pass">Pass</span></td><td>—</td></tr>
+        <tr><td>TC6</td><td>Secure Notes CRUD</td><td>High</td><td><span class="badge badge-pass">Pass</span></td><td>—</td></tr>
+        <tr><td>TC7</td><td>Family Members CRUD</td><td>High</td><td><span class="badge badge-pass">Pass</span></td><td>—</td></tr>
+        <tr><td>TC8</td><td>Form Validation</td><td>Medium</td><td><span class="badge badge-partial">Partial</span></td><td>BUG-004</td></tr>
+        <tr><td>TC9</td><td>Search and Filter</td><td>High</td><td><span class="badge badge-fail">Fail</span></td><td>BUG-001</td></tr>
+        <tr><td>TC10</td><td>Navigation & Routing</td><td>High</td><td><span class="badge badge-pass">Pass</span></td><td>BUG-003</td></tr>
+        <tr><td>TC11</td><td>Sharing Toggle</td><td>Medium</td><td><span class="badge badge-pass">Pass</span></td><td>—</td></tr>
+        <tr><td>TC12</td><td>Language & UI</td><td>Low</td><td><span class="badge badge-pass">Pass</span></td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Recommendations -->
+  <div class="section">
+    <h2 class="section-title">💡 Recommendations</h2>
+    <div class="tc-card" style="border-left-color: var(--info);">
+      <ol style="padding-left: 20px; font-size: 14px; line-height: 2;">
+        <li><strong>Fix Global Search (BUG-001 — Critical):</strong> Implement the search query parameter handling on the dashboard page to filter results across all vault sections. This is a core feature for a password/information vault.</li>
+        <li><strong>Fix Tab Order in Form Modals (BUG-002 — High):</strong> Audit and correct the <code>tabindex</code> attributes on all form fields in create/edit modals. Ensure the Tab key follows the visual top-to-bottom field order. Pay special attention to date picker fields which may intercept or skip tab focus.</li>
+        <li><strong>Create Branded 404 Page (BUG-003 — Medium):</strong> Replace the default Next.js 404 page with a custom page that includes Senpar branding, sidebar navigation, and a "Go to Dashboard" button.</li>
+        <li><strong>Add Visible Validation Errors (BUG-004 — Low):</strong> Show inline error messages (red text below fields) and red borders on required fields when validation fails, rather than silently blocking submission.</li>
+        <li><strong>Accessibility Audit:</strong> Given the Tab order bug, a broader accessibility audit is recommended to ensure WCAG 2.1 compliance across all interactive elements.</li>
+      </ol>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <p>Test Report generated on October 1, 2026 | Senpar — Family Information Vault | Test Plan: <code>/home/ubuntu/test_plans/test_plan_senpar.abacusai.app.json</code></p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,169 @@
+{
+  "test_plan": {
+    "application": "Senpar — Family Information Vault",
+    "url": "https://senpar.abacusai.app",
+    "created": "2026-10-01T12:00:00Z",
+    "schedule": "Weekly, Mondays at 9:00 AM PT",
+    "environment": {
+      "browser": "Google Chrome (Linux)",
+      "os": "Ubuntu Linux",
+      "viewport": "1024x768",
+      "language": "Danish (DK)"
+    },
+    "test_cases": [
+      {
+        "id": "TC1",
+        "feature": "Authentication",
+        "description": "Login with demo credentials, login with invalid credentials, sign-up link, logout, and session persistence after page refresh and direct URL access",
+        "steps": [
+          "Navigate to login page",
+          "Attempt login with invalid credentials - verify error message",
+          "Click 'Fill demo credentials' and login - verify dashboard loads",
+          "Refresh page - verify session persists",
+          "Navigate directly to /vault/passwords - verify access",
+          "Logout - verify redirect to login",
+          "Navigate to /vault/passwords while logged out - verify redirect to login",
+          "Verify sign-up link navigates to /signup"
+        ],
+        "priority": "Critical"
+      },
+      {
+        "id": "TC2",
+        "feature": "Dashboard (Oversigt)",
+        "description": "Verify summary counts match actual items in each section, verify recent items cards are clickable and navigate correctly",
+        "steps": [
+          "Login and navigate to dashboard",
+          "Verify counts: Adgangskoder=3, Enheder=5, Abonnementer=4, Sikre noter=3, Familie=5",
+          "Click each summary card - verify navigation to correct section",
+          "Click a recent element card - verify navigation"
+        ],
+        "priority": "High"
+      },
+      {
+        "id": "TC3",
+        "feature": "Vault CRUD - Passwords",
+        "description": "Create new password entry with all fields, edit existing entry, delete entry, verify password masking, test filter/search functionality",
+        "steps": [
+          "Click 'Tilføj ny' to open create modal",
+          "Fill all fields (Titel, Brugernavn/E-mail, Adgangskode, Websted-URL, Noter)",
+          "Toggle sharing and save - verify entry appears",
+          "Click entry to edit - verify all fields persisted correctly",
+          "Update title and save - verify update",
+          "Delete entry via context menu - confirm deletion",
+          "Test filter by typing in filter box - verify results"
+        ],
+        "priority": "Critical"
+      },
+      {
+        "id": "TC4",
+        "feature": "Vault CRUD - Devices",
+        "description": "Create new device, edit existing device, delete device, verify device type categorization, test filter functionality",
+        "steps": [
+          "Click 'Tilføj ny' to open create modal",
+          "Fill all fields including device type dropdown selection",
+          "Save and verify entry appears with correct type label",
+          "Delete entry and verify removal"
+        ],
+        "priority": "High"
+      },
+      {
+        "id": "TC5",
+        "feature": "Vault CRUD - Subscriptions",
+        "description": "Create new subscription with cost fields, edit existing, delete, verify cost display formatting, test filter",
+        "steps": [
+          "Click 'Tilføj ny' to open create modal",
+          "Fill all fields including price and billing cycle",
+          "Save and verify entry appears with correct cost display",
+          "Delete entry and verify removal"
+        ],
+        "priority": "High"
+      },
+      {
+        "id": "TC6",
+        "feature": "Vault CRUD - Secure Notes",
+        "description": "Create new note, edit existing note, delete note, verify content persistence, test filter",
+        "steps": [
+          "Click 'Tilføj ny' to open create modal",
+          "Fill Titel, Kategorimærke, and Indhold fields",
+          "Save and verify entry appears",
+          "Click entry to verify content persisted",
+          "Delete entry and verify removal"
+        ],
+        "priority": "High"
+      },
+      {
+        "id": "TC7",
+        "feature": "Vault CRUD - Family Members",
+        "description": "Create new family member with all fields, edit existing, delete, verify sharing toggle, test filter",
+        "steps": [
+          "Click 'Tilføj ny' to open create modal",
+          "Fill all fields (Titel, Relation, Fødselsdag, Telefon, E-mail, Noter)",
+          "Toggle sharing and save - verify entry appears",
+          "Click entry to verify all fields persisted correctly",
+          "Delete entry and verify removal"
+        ],
+        "priority": "High"
+      },
+      {
+        "id": "TC8",
+        "feature": "Form Validation",
+        "description": "Submit empty required fields across all vault types, test boundary inputs (XSS payloads), invalid formats",
+        "steps": [
+          "Open create modal for passwords",
+          "Click save with empty title - verify validation prevents submission",
+          "Enter XSS payload as title - verify it is escaped on render",
+          "Clean up test entries"
+        ],
+        "priority": "Medium"
+      },
+      {
+        "id": "TC9",
+        "feature": "Search and Filter",
+        "description": "Global search bar functionality, per-section filter functionality, verify results accuracy",
+        "steps": [
+          "Type search term in global search bar (top) - verify results",
+          "Press Enter - verify search results page",
+          "Type filter term in per-section filter box - verify filtering"
+        ],
+        "priority": "High"
+      },
+      {
+        "id": "TC10",
+        "feature": "Navigation and Routing",
+        "description": "All sidebar links work correctly, direct URL access, browser back/forward, 404 handling",
+        "steps": [
+          "Click each sidebar link - verify correct page loads",
+          "Navigate to /nonexistent-page - verify 404 handling",
+          "Use browser back/forward buttons - verify navigation",
+          "Access protected routes while logged out - verify redirect"
+        ],
+        "priority": "High"
+      },
+      {
+        "id": "TC11",
+        "feature": "Sharing/Privacy Toggle",
+        "description": "Verify 'Del med familien' toggle changes item visibility badge, verify toggle state persists after save",
+        "steps": [
+          "Open an existing 'Privat' item",
+          "Toggle 'Del med familien' ON and save",
+          "Verify badge changes from 'Privat' to 'Delt'",
+          "Re-open item - verify toggle state persisted",
+          "Toggle back OFF and save - verify badge reverts"
+        ],
+        "priority": "Medium"
+      },
+      {
+        "id": "TC12",
+        "feature": "Language and UI",
+        "description": "Danish language selector (DK flag), test mode banner visibility, responsive layout indicators",
+        "steps": [
+          "Verify DK flag and language indicator in header",
+          "Verify test mode banner at top and bottom",
+          "Verify all UI text is in Danish",
+          "Check for broken images and broken links via DOM inspection"
+        ],
+        "priority": "Low"
+      }
+    ]
+  }
+}
